@@ -16,7 +16,18 @@ class ParentContainer<Context extends object, State extends object> extends Cont
 
 /* COMPOSE */
 
-function compose ( containers: object ) {
+interface StateObject {
+  [name: string]: any;
+  ctx: any;
+  setState: (obj: any) => any
+}
+type StateObjectCtor = new () => StateObject;
+
+type Types = {
+  [name: string]: StateObjectCtor | StateObject;
+}
+
+function compose ( containers: Types ) {
 
   return function ( MainContainer ) {
 
@@ -31,7 +42,10 @@ function compose ( containers: object ) {
 
         for ( let name in containers ) {
 
-          const container = new containers[name]();
+          // find what we have
+          const val = containers[name];
+          const c = (typeof val == 'object') ? containers[name] : new (containers[name] as StateObjectCtor)();
+          const container = c as StateObject;
 
           container.ctx = this;
 
